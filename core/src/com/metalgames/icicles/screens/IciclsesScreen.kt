@@ -3,31 +3,27 @@ package com.metalgames.icicles.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.Screen
-import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.metalgames.icicles.gameConstants.Constants
 import com.metalgames.icicles.gameMaanager.Difficulty
-import com.metalgames.icicles.gameObjects.Icicle
-import com.metalgames.icicles.gameObjects.Icicles
+import com.metalgames.icicles.gameObjects.FireShot
 import com.metalgames.icicles.gameObjects.Player
-import kotlin.math.max
 
 class IciclsesScreen(private val difficulty: Difficulty, private val game: IciclesGame) : InputAdapter(), Screen {
 
     private val shapeRenderer = ShapeRenderer()
-    private val viewPort = ExtendViewport(Constants.WORLD_SIZE, Constants.WORLD_SIZE)
+    private val viewPort = ExtendViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT)
     //private var icicle = Icicle()
-    private lateinit var icicles: Icicles
+   // private lateinit var icicles: Icicles
     private lateinit var player: Player
+    private lateinit var fireShot: FireShot
 
     //HUD
     val hudViewPort = ScreenViewport()
@@ -40,8 +36,9 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
     override fun show() {
         Gdx.input.inputProcessor = this
         shapeRenderer.setAutoShapeType(true)
-        icicles = Icicles(difficulty)
-        player = Player(Constants.WORLD_SIZE / 2)
+     //   icicles = Icicles(difficulty)
+        player = Player(0f)
+        fireShot= FireShot()
         bitmapFont.region.texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
     }
 
@@ -80,40 +77,33 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
 
         shapeRenderer.projectionMatrix = viewPort.camera.combined
         //icicle.update(delta)
-        icicles.update(delta)
+       // icicles.update(delta)
         player.update(delta)
 
-        if (player.isHitByIcicle(icicles.iciclesList)) {
-            icicles.reset()
-        }
+       // if (player.isHitByIcicle(icicles.iciclesList)) {
+       //     icicles.reset()
+       // }
 
-        shapeRenderer.begin()
+       // shapeRenderer.begin()
         //  icicle.render(shapeRenderer)
-        icicles.render(shapeRenderer)
+     //   icicles.render(shapeRenderer)
         player.render(shapeRenderer)
-        shapeRenderer.end()
+        fireShot.render(shapeRenderer)
+
+      //  Intersector.overlapConvexPolygons()
+       // shapeRenderer.end()
 
         //update hud
-        highScore = max(icicles.dodgedIcicles, highScore)
+    //    highScore = max(icicles.dodgedIcicles, highScore)
 
         hudViewPort.apply()
         spriteBatch.projectionMatrix = hudViewPort.camera.combined
         spriteBatch.begin()
         bitmapFont.draw(
             spriteBatch,
-            "Deaths ${player.playerdDeaths}",
+            "Deaths ${player.playerDeaths}",
             Constants.HUD_MARGIN,
             hudViewPort.worldHeight - Constants.HUD_MARGIN
-        )
-
-        bitmapFont.draw(
-            spriteBatch,
-            "Score ${icicles.dodgedIcicles} \nTop score $highScore",
-            hudViewPort.worldWidth - Constants.HUD_MARGIN,
-            hudViewPort.worldHeight - Constants.HUD_MARGIN,
-            0f,
-            Align.right,
-            false
         )
 
         spriteBatch.end()

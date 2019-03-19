@@ -6,89 +6,113 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.metalgames.icicles.gameConstants.Constants
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.*
+import com.badlogic.gdx.math.EarClippingTriangulator
+import com.badlogic.gdx.math.Polygon
+
 
 class Player(positionX: Float) {
+    var ship: Texture = Texture(Gdx.files.internal("Ship_LVL_1.png"))
+    var shipTextureRegion:TextureRegion= TextureRegion(ship)
+    var batch: SpriteBatch = SpriteBatch()
+    var polySpriteBatch:PolygonSpriteBatch= PolygonSpriteBatch()
+    var playerDeaths = 0
+    var poly = Polygon()
+    lateinit var polyRegion:PolygonRegion
+    private var shipPosition: Vector2
+    lateinit var polySprite:PolygonSprite
+    //private var vertices: FloatArray
 
-    private var headPosition: Vector2
-    var playerdDeaths = 0
 
     init {
-        headPosition = Vector2(positionX, BODY_HEIGHT + LEGS_HEIGHT + HEAD_RADIUS / 2)
+        shipPosition = Vector2(positionX, SHIP_HEIGHT)
+
+        // vertices = getVertices()
+        polyRegion= PolygonRegion(shipTextureRegion,getVertices(),EarClippingTriangulator().computeTriangles(getVertices()).toArray())
+        poly.vertices = getVertices()
+        polySprite= PolygonSprite(polyRegion)
     }
+
 
     fun update(delta: Float) {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            headPosition.x -= delta * MOVEMENT_SPEED
+            shipPosition.x -= delta * MOVEMENT_SPEED
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            headPosition.x += delta * MOVEMENT_SPEED
+            shipPosition.x += delta * MOVEMENT_SPEED
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            shipPosition.y += delta * MOVEMENT_SPEED
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            shipPosition.y -= delta * MOVEMENT_SPEED
         }
 
 
-        if (headPosition.x < HEAD_RADIUS) {
-            headPosition.x = HEAD_RADIUS
+
+        if (shipPosition.x < SHIP_WIDTH / 2f) {
+            shipPosition.x = SHIP_WIDTH / 2f
         }
-        if (headPosition.x > Constants.WORLD_SIZE - HEAD_RADIUS) {
-            headPosition.x = Constants.WORLD_SIZE - HEAD_RADIUS
+        if (shipPosition.x > Constants.WORLD_HEIGHT - SHIP_WIDTH / 2f) {
+            shipPosition.x = Constants.WORLD_HEIGHT - SHIP_WIDTH / 2f
         }
 
         val accelerometerInput = -Gdx.input.accelerometerY / (ACCELERATION * GRAVITY)
-        headPosition.x += -accelerometerInput * delta * MOVEMENT_SPEED
+        shipPosition.x += -accelerometerInput * delta * MOVEMENT_SPEED
+
     }
 
     fun render(shapeRenderer: ShapeRenderer) {
 
         //draw head
-        // shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.color = COLOR
-        shapeRenderer.circle(headPosition.x, BODY_HEIGHT + LEGS_HEIGHT + HEAD_RADIUS / 2, HEAD_RADIUS)
-        shapeRenderer.end()
-
-        //draw body
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        //  shapeRenderer.setColor(Color.YELLOW)
-        shapeRenderer.line(headPosition.x, LEGS_HEIGHT, headPosition.x, LEGS_HEIGHT + BODY_HEIGHT)
+        shapeRenderer.polygon(poly.vertices)
+        shapeRenderer.end()
+        batch.begin()
+       // batch.draw(polySprite)
+        batch.draw(ship, shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f, SHIP_WIDTH, SHIP_HEIGHT)
 
-
-        //draw hands
-        shapeRenderer.line(
-            headPosition.x,
-            SHOULDER_HEIGHT,
-            headPosition.x + HANDS_HORIZONTAL_REACH,
-            SHOULDER_HEIGHT + HANDS_VERTICAL_REACH
-        )
-        shapeRenderer.line(
-            headPosition.x,
-            SHOULDER_HEIGHT,
-            headPosition.x - HANDS_HORIZONTAL_REACH,
-            SHOULDER_HEIGHT + HANDS_VERTICAL_REACH
-        )
-
-        //draw legs
-        shapeRenderer.line(headPosition.x, LEGS_HEIGHT, headPosition.x + LEG_HORIZONTAL_REACH, 0f)
-        shapeRenderer.line(headPosition.x, LEGS_HEIGHT, headPosition.x - LEG_HORIZONTAL_REACH, 0f)
+        batch.end()
+//        polySpriteBatch.begin()
+//        polySpriteBatch.draw(polyRegion,shipPosition.x,shipPosition.y)
+//        polySpriteBatch.end()
+        poly.vertices = getVertices()
     }
 
-    fun isHitByIcicle(icicles: List<Icicle>): Boolean {
-        for (icicle: Icicle in icicles) {
-            if (icicle.impactPosition.dst(headPosition) < HEAD_RADIUS) {
-                playerdDeaths++
-                return true
-            }
-        }
-        return false
+    //    fun isHitByIcicle(icicles: List<Icicle>): Boolean {
+//        for (icicle: Icicle in icicles) {
+//            if (icicle.impactPosition.dst(shipPosition) < HEAD_RADIUS) {
+//                playerDeaths++
+//                return true
+//            }
+//        }
+//        return false
+//    }
+    private fun getVertices(): FloatArray {
+        return floatArrayOf(
+            shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
+            shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
+            shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y,
+            shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
+            shipPosition.x + SHIP_BODY_WIDTH/2f, shipPosition.y + SHIP_HEIGHT / 2f,
+            shipPosition.x - SHIP_BODY_WIDTH/2f, shipPosition.y + SHIP_HEIGHT / 2f,
+            shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
+            shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y,
+            shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f
+
+            )
     }
 
     companion object {
         val TAG = Player::class.java.simpleName
         val COLOR: Color = Color.CYAN
-        const val HEAD_RADIUS = 60f
-        const val BODY_HEIGHT = 200f
-        const val LEGS_HEIGHT = 70f
-        const val SHOULDER_HEIGHT = 180f
-        const val HANDS_HORIZONTAL_REACH = 40f
-        const val HANDS_VERTICAL_REACH = 20f
-        const val LEG_HORIZONTAL_REACH = 30f
+
+        const val SHIP_WIDTH = 106f
+        const val SHIP_HEIGHT = 86f
+        const val SHIP_BODY_WIDTH = 50f
+        const val SHIP_WING_START_POSITION = 20f
 
         //movement
         const val MOVEMENT_SPEED = 250f
