@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Intersector
+import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.metalgames.icicles.gameConstants.Constants
@@ -25,6 +26,7 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
     // private lateinit var icicles: Icicles
     private lateinit var player: Player
     private lateinit var fireShot: FireShot
+    private var intersectPoly = Polygon()
 
     //HUD
     val hudViewPort = ScreenViewport()
@@ -85,12 +87,18 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
 
 
         player.render(shapeRenderer, viewPort)
-        fireShot.render(shapeRenderer,viewPort)
-        Gdx.app.debug("pos", "position = ${player.poly.vertices[0]} \n shot=${fireShot.poly.vertices[0]}")
-         if( Intersector.overlapConvexPolygons(player.poly,fireShot.poly)){
-             game.showDifficultyScreen()
-         }
-        // shapeRenderer.end()
+        fireShot.render(shapeRenderer, viewPort)
+
+        //probably better performance for points but not really applicable
+//        if(player.poly.contains(fireShot.position)){
+//            game.showDifficultyScreen()
+//        }
+
+        if (Intersector.intersectPolygons(player.poly, fireShot.poly, intersectPoly)) {
+            game.showDifficultyScreen()
+        }
+        Gdx.app.debug("pos", "position = ${player.poly.transformedVertices[0]} \n transformed vertices=${fireShot.poly.transformedVertices[0]} \n transformed size ${intersectPoly.transformedVertices.size}")
+
 
         //update hud
         //    highScore = max(icicles.dodgedIcicles, highScore)
@@ -99,10 +107,10 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
         spriteBatch.projectionMatrix = hudViewPort.camera.combined
         spriteBatch.begin()
         bitmapFont.draw(
-            spriteBatch,
-            "Deaths ${player.playerDeaths}",
-            Constants.HUD_MARGIN,
-            hudViewPort.worldHeight - Constants.HUD_MARGIN
+                spriteBatch,
+                "Deaths ${player.playerDeaths}",
+                Constants.HUD_MARGIN,
+                hudViewPort.worldHeight - Constants.HUD_MARGIN
         )
 
         spriteBatch.end()

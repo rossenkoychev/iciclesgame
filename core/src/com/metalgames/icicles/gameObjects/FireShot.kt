@@ -19,7 +19,7 @@ class FireShot {
     var poly = Polygon()
 
     init {
-        poly.vertices = getVertices()
+        poly.vertices = getClockwiseVertices()
         // position =
     }
 
@@ -56,6 +56,16 @@ class FireShot {
             position.x + SHOT_WIDTH / 2f, position.y - SHOT_HEIGHT / 2f,
             position.x + SHOT_WIDTH / 2f, position.y +SHOT_HEIGHT / 2f,
             position.x - SHOT_WIDTH / 2f, position.y +SHOT_HEIGHT / 2f
+
+        )
+    }
+
+    private fun getClockwiseVertices(): FloatArray {
+        return floatArrayOf(
+                position.x - SHOT_WIDTH / 2f, position.y +SHOT_HEIGHT / 2f,
+                position.x + SHOT_WIDTH / 2f, position.y +SHOT_HEIGHT / 2f,
+                position.x + SHOT_WIDTH / 2f, position.y - SHOT_HEIGHT / 2f,
+                position.x - SHOT_WIDTH / 2f, position.y - SHOT_HEIGHT / 2f
 
         )
     }

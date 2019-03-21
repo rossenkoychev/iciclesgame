@@ -24,7 +24,7 @@ class Player(positionX: Float) {
 
     init {
         shipPosition = Vector2(positionX, SHIP_HEIGHT)
-        poly.vertices = getVertices()
+        poly.vertices = getClockwiseVertices()
     }
 
 
@@ -68,15 +68,15 @@ class Player(positionX: Float) {
         batch.projectionMatrix = viewPort.camera.combined
         batch.begin()
         batch.draw(
-            ship,
-            shipPosition.x - SHIP_WIDTH / 2f,
-            shipPosition.y - SHIP_HEIGHT / 2f,
-            SHIP_WIDTH,
-            SHIP_HEIGHT
+                ship,
+                shipPosition.x - SHIP_WIDTH / 2f,
+                shipPosition.y - SHIP_HEIGHT / 2f,
+                SHIP_WIDTH,
+                SHIP_HEIGHT
         )
 
         batch.end()
-        poly.vertices = getVertices()
+        poly.vertices = getClockwiseVertices()
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
         shapeRenderer.polygon(poly.vertices)
@@ -85,17 +85,32 @@ class Player(positionX: Float) {
 
     private fun getVertices(): FloatArray {
         return floatArrayOf(
-            shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
-            shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
-            shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y,
-            shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
-            shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f,
-            shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f,
-            shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
-            shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y,
-            shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f
+                shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
+                shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
+                shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y,
+                shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
+                shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f,
+                shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f,
+                shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
+                shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y,
+                shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f
 
         )
+    }
+
+    private fun getClockwiseVertices(): FloatArray {
+        return floatArrayOf(
+                shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
+                shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y,
+                shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
+                shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f,
+                shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f,
+                shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
+                shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y,
+                shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
+                shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f
+
+                )
     }
 
     companion object {
