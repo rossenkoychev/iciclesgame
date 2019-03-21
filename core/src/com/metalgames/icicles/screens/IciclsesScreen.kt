@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.metalgames.icicles.gameConstants.Constants
@@ -21,7 +22,7 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
     private val shapeRenderer = ShapeRenderer()
     private val viewPort = ExtendViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT)
     //private var icicle = Icicle()
-   // private lateinit var icicles: Icicles
+    // private lateinit var icicles: Icicles
     private lateinit var player: Player
     private lateinit var fireShot: FireShot
 
@@ -36,9 +37,9 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
     override fun show() {
         Gdx.input.inputProcessor = this
         shapeRenderer.setAutoShapeType(true)
-     //   icicles = Icicles(difficulty)
+        //   icicles = Icicles(difficulty)
         player = Player(0f)
-        fireShot= FireShot()
+        fireShot = FireShot()
         bitmapFont.region.texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
     }
 
@@ -51,7 +52,8 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
     }
 
     override fun dispose() {
-
+        player.dispose()
+        fireShot.dispose()
     }
 
     override fun hide() {
@@ -77,24 +79,21 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
 
         shapeRenderer.projectionMatrix = viewPort.camera.combined
         //icicle.update(delta)
-       // icicles.update(delta)
+        // icicles.update(delta)
         player.update(delta)
 
-       // if (player.isHitByIcicle(icicles.iciclesList)) {
-       //     icicles.reset()
-       // }
 
-       // shapeRenderer.begin()
-        //  icicle.render(shapeRenderer)
-     //   icicles.render(shapeRenderer)
-        player.render(shapeRenderer)
-        fireShot.render(shapeRenderer)
 
-      //  Intersector.overlapConvexPolygons()
-       // shapeRenderer.end()
+        player.render(shapeRenderer, viewPort)
+        fireShot.render(shapeRenderer,viewPort)
+        Gdx.app.debug("pos", "position = ${player.poly.vertices[0]} \n shot=${fireShot.poly.vertices[0]}")
+         if( Intersector.overlapConvexPolygons(player.poly,fireShot.poly)){
+             game.showDifficultyScreen()
+         }
+        // shapeRenderer.end()
 
         //update hud
-    //    highScore = max(icicles.dodgedIcicles, highScore)
+        //    highScore = max(icicles.dodgedIcicles, highScore)
 
         hudViewPort.apply()
         spriteBatch.projectionMatrix = hudViewPort.camera.combined

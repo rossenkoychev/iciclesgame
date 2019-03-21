@@ -3,35 +3,28 @@ package com.metalgames.icicles.gameObjects
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Vector2
-import com.metalgames.icicles.gameConstants.Constants
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.*
-import com.badlogic.gdx.math.EarClippingTriangulator
+import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Polygon
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.utils.viewport.ExtendViewport
+import com.metalgames.icicles.gameConstants.Constants
 
 
 class Player(positionX: Float) {
     var ship: Texture = Texture(Gdx.files.internal("Ship_LVL_1.png"))
-    var shipTextureRegion:TextureRegion= TextureRegion(ship)
     var batch: SpriteBatch = SpriteBatch()
-    var polySpriteBatch:PolygonSpriteBatch= PolygonSpriteBatch()
+
     var playerDeaths = 0
     var poly = Polygon()
-    lateinit var polyRegion:PolygonRegion
-    private var shipPosition: Vector2
-    lateinit var polySprite:PolygonSprite
-    //private var vertices: FloatArray
 
+    private var shipPosition: Vector2
 
     init {
         shipPosition = Vector2(positionX, SHIP_HEIGHT)
-
-        // vertices = getVertices()
-        polyRegion= PolygonRegion(shipTextureRegion,getVertices(),EarClippingTriangulator().computeTriangles(getVertices()).toArray())
         poly.vertices = getVertices()
-        polySprite= PolygonSprite(polyRegion)
     }
 
 
@@ -64,45 +57,45 @@ class Player(positionX: Float) {
 
     }
 
-    fun render(shapeRenderer: ShapeRenderer) {
+    fun dispose() {
+        batch.dispose()
+        ship.dispose()
+    }
+
+    fun render(shapeRenderer: ShapeRenderer, viewPort: ExtendViewport) {
 
         //draw head
+        batch.projectionMatrix = viewPort.camera.combined
+        batch.begin()
+        batch.draw(
+            ship,
+            shipPosition.x - SHIP_WIDTH / 2f,
+            shipPosition.y - SHIP_HEIGHT / 2f,
+            SHIP_WIDTH,
+            SHIP_HEIGHT
+        )
+
+        batch.end()
+        poly.vertices = getVertices()
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
         shapeRenderer.polygon(poly.vertices)
         shapeRenderer.end()
-        batch.begin()
-       // batch.draw(polySprite)
-        batch.draw(ship, shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f, SHIP_WIDTH, SHIP_HEIGHT)
-
-        batch.end()
-//        polySpriteBatch.begin()
-//        polySpriteBatch.draw(polyRegion,shipPosition.x,shipPosition.y)
-//        polySpriteBatch.end()
-        poly.vertices = getVertices()
     }
 
-    //    fun isHitByIcicle(icicles: List<Icicle>): Boolean {
-//        for (icicle: Icicle in icicles) {
-//            if (icicle.impactPosition.dst(shipPosition) < HEAD_RADIUS) {
-//                playerDeaths++
-//                return true
-//            }
-//        }
-//        return false
-//    }
     private fun getVertices(): FloatArray {
         return floatArrayOf(
             shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
             shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
             shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y,
             shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
-            shipPosition.x + SHIP_BODY_WIDTH/2f, shipPosition.y + SHIP_HEIGHT / 2f,
-            shipPosition.x - SHIP_BODY_WIDTH/2f, shipPosition.y + SHIP_HEIGHT / 2f,
+            shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f,
+            shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f,
             shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f - SHIP_WING_START_POSITION,
             shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y,
             shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f
 
-            )
+        )
     }
 
     companion object {

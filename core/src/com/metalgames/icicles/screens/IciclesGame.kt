@@ -5,6 +5,10 @@ import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.metalgames.icicles.gameMaanager.Difficulty
 
+
+var screenWidth:Int=0
+var screenHeight:Int=0
+
 class IciclesGame : Game() {
 
 
