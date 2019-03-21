@@ -26,6 +26,8 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
     // private lateinit var icicles: Icicles
     private lateinit var player: Player
     private lateinit var fireShot: FireShot
+
+    //intersect poly can be used for area damage, to determine how much area damage is suffered
     private var intersectPoly = Polygon()
 
     //HUD
