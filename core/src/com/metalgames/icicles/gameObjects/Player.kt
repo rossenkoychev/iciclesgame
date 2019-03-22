@@ -19,7 +19,7 @@ class Player(positionX: Float) {
 
     var playerDeaths = 0
     var poly = Polygon()
-
+    lateinit var moveDirection: Vector2
     private var shipPosition: Vector2
 
     init {
@@ -28,7 +28,7 @@ class Player(positionX: Float) {
     }
 
 
-    fun update(delta: Float) {
+    fun update(delta: Float, playerTouch: Vector2?) {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             shipPosition.x -= delta * MOVEMENT_SPEED
         }
@@ -43,17 +43,26 @@ class Player(positionX: Float) {
             shipPosition.y -= delta * MOVEMENT_SPEED
         }
 
-
-
         if (shipPosition.x < SHIP_WIDTH / 2f) {
             shipPosition.x = SHIP_WIDTH / 2f
         }
-        if (shipPosition.x > Constants.WORLD_HEIGHT - SHIP_WIDTH / 2f) {
-            shipPosition.x = Constants.WORLD_HEIGHT - SHIP_WIDTH / 2f
+        if (shipPosition.x > Constants.WORLD_WIDTH - SHIP_WIDTH / 2f) {
+            shipPosition.x = Constants.WORLD_WIDTH - SHIP_WIDTH / 2f
         }
 
-        val accelerometerInput = -Gdx.input.accelerometerY / (ACCELERATION * GRAVITY)
-        shipPosition.x += -accelerometerInput * delta * MOVEMENT_SPEED
+        if (shipPosition.y <  SHIP_HEIGHT / 2f) {
+            shipPosition.y =  SHIP_HEIGHT / 2f
+        }
+
+        // val accelerometerInput = -Gdx.input.accelerometerY / (ACCELERATION * GRAVITY)
+        if (playerTouch != null) {
+            moveDirection = playerTouch.sub(shipPosition)
+
+            shipPosition.x += delta * MOVEMENT_SPEED * (if(moveDirection.x<0)  -1 else 1)
+            shipPosition.y += delta * MOVEMENT_SPEED *(if(moveDirection.y<0)  -1 else 1)
+        }
+
+        Gdx.app.debug("pos", "x = ${shipPosition.x}  y=${ shipPosition.y} ")
 
     }
 
@@ -110,7 +119,7 @@ class Player(positionX: Float) {
                 shipPosition.x + SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
                 shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f
 
-                )
+        )
     }
 
     companion object {

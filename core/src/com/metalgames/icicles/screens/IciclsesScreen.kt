@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Polygon
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.metalgames.icicles.gameConstants.Constants
@@ -21,11 +22,12 @@ import com.metalgames.icicles.gameObjects.Player
 class IciclsesScreen(private val difficulty: Difficulty, private val game: IciclesGame) : InputAdapter(), Screen {
 
     private val shapeRenderer = ShapeRenderer()
-    private val viewPort = ExtendViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT)
+    private val viewPort = ExtendViewport(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
     //private var icicle = Icicle()
     // private lateinit var icicles: Icicles
     private lateinit var player: Player
     private lateinit var fireShot: FireShot
+    private var playerTouch: Vector2? = null
 
     //intersect poly can be used for area damage, to determine how much area damage is suffered
     private var intersectPoly = Polygon()
@@ -84,7 +86,7 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
         shapeRenderer.projectionMatrix = viewPort.camera.combined
         //icicle.update(delta)
         // icicles.update(delta)
-        player.update(delta)
+        player.update(delta, playerTouch)
 
 
 
@@ -99,7 +101,7 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
         if (Intersector.intersectPolygons(player.poly, fireShot.poly, intersectPoly)) {
             game.showDifficultyScreen()
         }
-        Gdx.app.debug("pos", "position = ${player.poly.transformedVertices[0]} \n transformed vertices=${fireShot.poly.transformedVertices[0]} \n transformed size ${intersectPoly.transformedVertices.size}")
+      //  Gdx.app.debug("pos", "position = ${player.poly.transformedVertices[0]} \n transformed vertices=${fireShot.poly.transformedVertices[0]} \n transformed size ${intersectPoly.transformedVertices.size}")
 
 
         //update hud
@@ -120,9 +122,15 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
 
     }
 
+    //touch handling should be more complicated when using multitouch, so the player can hit a button without the ship moving to the button
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+        playerTouch = viewPort.unproject(Vector2(screenX.toFloat(), screenY.toFloat()))
 
-        game.showDifficultyScreen()
+        return true
+    }
+
+    override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+        playerTouch = null
         return true
     }
 
