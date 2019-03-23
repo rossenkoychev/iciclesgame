@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Polygon
@@ -30,17 +29,17 @@ class Player(positionX: Float) {
 
     fun update(delta: Float, playerTouch: Vector2?) {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            shipPosition.x -= delta * MOVEMENT_SPEED
+            shipPosition.x -= delta * MOVEMENT_FACTOR
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            shipPosition.x += delta * MOVEMENT_SPEED
+            shipPosition.x += delta * MOVEMENT_FACTOR
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            shipPosition.y += delta * MOVEMENT_SPEED
+            shipPosition.y += delta * MOVEMENT_FACTOR
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            shipPosition.y -= delta * MOVEMENT_SPEED
+            shipPosition.y -= delta * MOVEMENT_FACTOR
         }
 
         if (shipPosition.x < SHIP_WIDTH / 2f) {
@@ -56,10 +55,19 @@ class Player(positionX: Float) {
 
         // val accelerometerInput = -Gdx.input.accelerometerY / (ACCELERATION * GRAVITY)
         if (playerTouch != null) {
-            moveDirection = playerTouch.sub(shipPosition)
-
-            shipPosition.x += delta * MOVEMENT_SPEED * (if(moveDirection.x<0)  -1 else 1)
-            shipPosition.y += delta * MOVEMENT_SPEED *(if(moveDirection.y<0)  -1 else 1)
+           // moveDirection = shipPosition.sub(playerTouch)
+             moveDirection = Vector2(playerTouch.x - shipPosition.x, playerTouch.y - shipPosition.y)
+            moveDirection.scaleDownIfNeeded(MOVEMENT_SPEED)
+          //  moveDirection.x = followVecotr.x * delta*MOVEMENT_FACTOR
+          //  moveDirection.y = followVecotr.y * delta*MOVEMENT_FACTOR
+          //  val x=delta * MOVEMENT_FACTOR * (if(moveDirection.x<0)  -1 else 1)
+           // val y= delta * MOVEMENT_FACTOR *(if(moveDirection.y<0)  -1 else 1)
+         //   shipPosition.x += x
+         //   shipPosition.y +=y
+            shipPosition.mulAdd(moveDirection,delta* MOVEMENT_FACTOR)
+            Gdx.app.debug("playerTouch", "x = ${playerTouch.x}  y=${playerTouch.y} ")
+            Gdx.app.debug("movedirection", "x = ${moveDirection.x}  y=${moveDirection.y} ")
+          //  Gdx.app.debug("mov", "x = ${x}  y=${y} ")
         }
 
         Gdx.app.debug("pos", "x = ${shipPosition.x}  y=${ shipPosition.y} ")
@@ -107,6 +115,21 @@ class Player(positionX: Float) {
         )
     }
 
+    /**
+     * This function is common to all moving objects
+     * Scales down a vector to a given maximum size
+     * MAke unit tests for this function
+     */
+    fun Vector2.scaleDownIfNeeded(maxLength:Float){
+        val scale:Float
+        val dist=Math.sqrt((this.x*this.x+this.y*this.y).toDouble())
+        if(dist>maxLength){
+            scale=maxLength/dist.toFloat()
+            this.x=scale*this.x
+            this.y=scale*this.y
+        }
+    }
+
     private fun getClockwiseVertices(): FloatArray {
         return floatArrayOf(
                 shipPosition.x - SHIP_WIDTH / 2f, shipPosition.y - SHIP_HEIGHT / 2f,
@@ -132,7 +155,8 @@ class Player(positionX: Float) {
         const val SHIP_WING_START_POSITION = 20f
 
         //movement
-        const val MOVEMENT_SPEED = 250f
+        const val MOVEMENT_FACTOR = 5f
+        const val MOVEMENT_SPEED=20f
 
         const val ACCELERATION = 0.5f
         const val GRAVITY = 9.8f
