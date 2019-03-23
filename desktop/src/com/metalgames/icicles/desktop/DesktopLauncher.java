@@ -7,7 +7,7 @@ import com.metalgames.icicles.screens.IciclesGame;
 public class DesktopLauncher {
     public static void main(String[] arg) {
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-        config.height = 800;
+        config.height = 640;
         config.width = 480;
         new LwjglApplication(new IciclesGame(), config);
     }

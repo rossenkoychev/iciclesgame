@@ -22,9 +22,8 @@ import com.metalgames.icicles.gameObjects.Player
 class IciclsesScreen(private val difficulty: Difficulty, private val game: IciclesGame) : InputAdapter(), Screen {
 
     private val shapeRenderer = ShapeRenderer()
-    private val viewPort = ExtendViewport(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
-    //private var icicle = Icicle()
-    // private lateinit var icicles: Icicles
+    private val viewPort = ExtendViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT)
+
     private lateinit var player: Player
     private lateinit var fireShot: FireShot
     private var playerTouch: Vector2? = null
@@ -129,13 +128,22 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
         return true
     }
 
+//    override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
+//        playerTouch = viewPort.unproject(Vector2(screenX.toFloat(), screenY.toFloat()))
+//        return  true
+//    }
+
     override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         playerTouch = null
         return true
     }
 
+    override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
+        playerTouch = viewPort.unproject(Vector2(screenX.toFloat(), screenY.toFloat()))
+        return true
+    }
 
-    companion object {
+        companion object {
         val TAG = IciclsesScreen::class.java.simpleName
         val BACKGROUND_COLOR: Color = Color.LIGHT_GRAY
     }
