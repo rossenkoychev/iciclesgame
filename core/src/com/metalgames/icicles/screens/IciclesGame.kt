@@ -12,7 +12,7 @@ class IciclesGame : Game() {
 
     }
     override fun create() {
-        Gdx.app.setLogLevel(Application.LOG_DEBUG)
+        Gdx.app.logLevel = Application.LOG_DEBUG
         //setScreen(IciclsesScreen())
         showDifficultyScreen()
     }
