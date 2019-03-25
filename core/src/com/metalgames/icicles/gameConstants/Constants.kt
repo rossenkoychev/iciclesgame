@@ -1,7 +1,5 @@
 package com.metalgames.icicles.gameConstants
 
-import com.badlogic.gdx.graphics.Color
-
 
 object Constants {
 
