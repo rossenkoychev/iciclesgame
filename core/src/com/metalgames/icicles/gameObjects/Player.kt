@@ -20,11 +20,26 @@ class Player(positionX: Float) {
     var poly = Polygon()
     lateinit var moveDirection: Vector2
     private var shipPosition: Vector2
+    private var shipShootingPoints: List<Vector2> = ArrayList<Vector2>()
     //private var vertices: FloatArray
 
     init {
         shipPosition = Vector2(positionX, SHIP_HEIGHT)
         poly.vertices = getClockwiseVertices()
+        shipShootingPoints = initializeShipShootingPoints()
+    }
+
+    private fun initializeShipShootingPoints(): List<Vector2> {
+        val shootingPointsList = arrayListOf<Vector2>()
+        val centralFront = Vector2(shipPosition.x, shipPosition.y + SHIP_HEIGHT / 2f)
+        val frontLeft = Vector2(shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2)
+        val frontRight = Vector2(shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2)
+
+        shootingPointsList.add(centralFront)
+        shootingPointsList.add(frontLeft)
+        shootingPointsList.add(frontRight)
+
+        return shootingPointsList
     }
 
 
@@ -55,8 +70,6 @@ class Player(positionX: Float) {
         }
 
         if (playerTouch != null) {
-
-
             moveDirection = Vector2(playerTouch.x - shipPosition.x, playerTouch.y - shipPosition.y)
             Gdx.app.debug("pos", "position = ${moveDirection.x} y=${moveDirection.y}")
             if (Math.abs(moveDirection.x) < MIN_MOVEMENT_DISTANCE && Math.abs(moveDirection.y) < MIN_MOVEMENT_DISTANCE) {
@@ -138,6 +151,13 @@ class Player(positionX: Float) {
         )
     }
 
+    private fun getShootingPoints(): List<Vector2> {
+        return floatArrayOf(
+            shipPosition.x, shipPosition.y + SHIP_HEIGHT / 2f, //the middle in front
+            shipPosition.x - SHIP_BODY_WIDTH,
+            )
+    }
+
     private fun updateClockwiseVertices(vertices: FloatArray, position: Vector2): FloatArray {
         vertices[0] = position.x - SHIP_WIDTH / 2f
         vertices[1] = shipPosition.y - SHIP_HEIGHT / 2f
@@ -168,12 +188,13 @@ class Player(positionX: Float) {
 
         const val SHIP_WIDTH = 106f
         const val SHIP_HEIGHT = 86f
-        const val SHIP_BODY_WIDTH = 50f
+        const val SHIP_BODY_WIDTH = 30f
         const val SHIP_WING_START_POSITION = 20f
 
         //movement
         const val MOVEMENT_FACTOR = 5f
         const val MOVEMENT_SPEED = 20f
+
 
         const val ACCELERATION = 0.5f
         const val GRAVITY = 9.8f
