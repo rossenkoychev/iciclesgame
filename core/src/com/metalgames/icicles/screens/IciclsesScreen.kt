@@ -17,13 +17,14 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.metalgames.icicles.gameConstants.Constants
 import com.metalgames.icicles.gameMaanager.Difficulty
 import com.metalgames.icicles.gameObjects.FireShot
+import com.metalgames.icicles.gameObjects.HeroShot
 import com.metalgames.icicles.gameObjects.Player
 
 class IciclsesScreen(private val difficulty: Difficulty, private val game: IciclesGame) : InputAdapter(), Screen {
 
     private val shapeRenderer = ShapeRenderer()
     private val viewPort = ExtendViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT)
-
+    private val shotsFired: ArrayList<HeroShot> = ArrayList()
     private lateinit var player: Player
     private lateinit var fireShot: FireShot
     private var playerTouch: Vector2? = null
@@ -85,11 +86,17 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
         shapeRenderer.projectionMatrix = viewPort.camera.combined
         //icicle.update(delta)
         // icicles.update(delta)
-        player.update(delta, playerTouch)
+       shotsFired.addAll( player.update(delta, playerTouch))
 
 
 
         player.render(shapeRenderer, viewPort)
+
+        for(shot:HeroShot in shotsFired){
+            shot.render(shapeRenderer, viewPort)
+        }
+
+        //deprecated shot
         fireShot.render(shapeRenderer, viewPort)
 
         //probably better performance for points but not really applicable
@@ -100,7 +107,7 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
         if (Intersector.intersectPolygons(player.poly, fireShot.poly, intersectPoly)) {
             game.showDifficultyScreen()
         }
-      //  Gdx.app.debug("pos", "position = ${player.poly.transformedVertices[0]} \n transformed vertices=${fireShot.poly.transformedVertices[0]} \n transformed size ${intersectPoly.transformedVertices.size}")
+        //  Gdx.app.debug("pos", "position = ${player.poly.transformedVertices[0]} \n transformed vertices=${fireShot.poly.transformedVertices[0]} \n transformed size ${intersectPoly.transformedVertices.size}")
 
 
         //update hud
@@ -110,10 +117,10 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
         spriteBatch.projectionMatrix = hudViewPort.camera.combined
         spriteBatch.begin()
         bitmapFont.draw(
-                spriteBatch,
-                "Deaths ${player.playerDeaths}",
-                Constants.HUD_MARGIN,
-                hudViewPort.worldHeight - Constants.HUD_MARGIN
+            spriteBatch,
+            "Deaths ${player.playerDeaths}",
+            Constants.HUD_MARGIN,
+            hudViewPort.worldHeight - Constants.HUD_MARGIN
         )
 
         spriteBatch.end()
@@ -143,7 +150,7 @@ class IciclsesScreen(private val difficulty: Difficulty, private val game: Icicl
         return true
     }
 
-        companion object {
+    companion object {
         val TAG = IciclsesScreen::class.java.simpleName
         val BACKGROUND_COLOR: Color = Color.LIGHT_GRAY
     }

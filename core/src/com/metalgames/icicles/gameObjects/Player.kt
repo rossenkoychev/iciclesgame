@@ -20,13 +20,20 @@ class Player(positionX: Float) {
     var poly = Polygon()
     lateinit var moveDirection: Vector2
     private var shipPosition: Vector2
-    private var shipShootingPoints: List<Vector2> = ArrayList<Vector2>()
+    private var shipShootingPoints: List<Vector2>
+
+    private var shootingTimeOut = SHOOT_TIMEOUT
+
+    private var shotSpeed=10f
+    private  var shotTexture: Texture = Texture(Gdx.files.internal("hero_shot.png"))
+
     //private var vertices: FloatArray
 
     init {
         shipPosition = Vector2(positionX, SHIP_HEIGHT)
         poly.vertices = getClockwiseVertices()
         shipShootingPoints = initializeShipShootingPoints()
+        shipShootingPoints=getShootingPoints()
     }
 
     private fun initializeShipShootingPoints(): List<Vector2> {
@@ -43,7 +50,7 @@ class Player(positionX: Float) {
     }
 
 
-    fun update(delta: Float, playerTouch: Vector2?) {
+    fun update(delta: Float, playerTouch: Vector2?): Collection<HeroShot> {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             shipPosition.x -= delta * MOVEMENT_FACTOR * MOVEMENT_SPEED
         }
@@ -73,11 +80,38 @@ class Player(positionX: Float) {
             moveDirection = Vector2(playerTouch.x - shipPosition.x, playerTouch.y - shipPosition.y)
             Gdx.app.debug("pos", "position = ${moveDirection.x} y=${moveDirection.y}")
             if (Math.abs(moveDirection.x) < MIN_MOVEMENT_DISTANCE && Math.abs(moveDirection.y) < MIN_MOVEMENT_DISTANCE) {
-                return
+                //moving is not pixel perfect because it causes a shimmering bug
             }
-            moveDirection.scaleToShipSpeed(MOVEMENT_SPEED)
-            shipPosition.mulAdd(moveDirection, delta * MOVEMENT_FACTOR)
+            else {
+                moveDirection.scaleToShipSpeed(MOVEMENT_SPEED)
+                shipPosition.mulAdd(moveDirection, delta * MOVEMENT_FACTOR)
+            }
         }
+
+        //updateShooting
+        shootingTimeOut -= delta
+        if (shootingTimeOut <= 0) {
+            return produceShots()
+        }
+        return emptyList()
+    }
+
+
+    //TODO SHOTS SHOULD NOT BE CREATED BUT RATHER REUSED FOR PERFORMANCE GAINS
+    //either everyship reuses its shots, or one list is for the entire level
+    private fun produceShots(): List<HeroShot> {
+
+        var shotVelocity=getShotVelocity(shotSpeed)
+        var shot = HeroShot(updateShootingPoints(shipShootingPoints)[0],shotTexture,shotVelocity)
+
+
+        return listOf(shot)
+    }
+
+    private fun getShotVelocity(shotSpeed: Float): Vector2 {
+        //depending on ship position(rotation)
+        //hero shot upwards, so y decreases, enemies will be reverse
+       return (Vector2(0f,-shotSpeed))
     }
 
     fun dispose() {
@@ -151,11 +185,30 @@ class Player(positionX: Float) {
         )
     }
 
+    //this method should be for all ships, ally and enemy
     private fun getShootingPoints(): List<Vector2> {
-        return floatArrayOf(
-            shipPosition.x, shipPosition.y + SHIP_HEIGHT / 2f, //the middle in front
-            shipPosition.x - SHIP_BODY_WIDTH,
-            )
+        return arrayListOf(
+            Vector2(shipPosition.x, shipPosition.y + SHIP_HEIGHT / 2f), //the middle in front
+            Vector2(shipPosition.x - SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f),
+            Vector2(shipPosition.x + SHIP_BODY_WIDTH / 2f, shipPosition.y + SHIP_HEIGHT / 2f)
+        )
+    }
+
+    //this method should be for all ships, ally and enemy
+    private fun updateShootingPoints(currentPoints: List<Vector2>): List<Vector2> {
+        //the middle in front
+        currentPoints[0].x = shipPosition.x
+        currentPoints[0].y = shipPosition.y + SHIP_HEIGHT / 2f
+
+        //front left
+        currentPoints[1].x = shipPosition.x - SHIP_BODY_WIDTH / 2f
+        currentPoints[1].y = shipPosition.y + SHIP_HEIGHT / 2f
+
+        //front right
+        currentPoints[2].x = shipPosition.x + SHIP_BODY_WIDTH / 2f
+        currentPoints[2].y = shipPosition.y + SHIP_HEIGHT / 2f
+
+        return currentPoints
     }
 
     private fun updateClockwiseVertices(vertices: FloatArray, position: Vector2): FloatArray {
@@ -200,6 +253,7 @@ class Player(positionX: Float) {
         const val GRAVITY = 9.8f
 
         const val MIN_MOVEMENT_DISTANCE = 5f
+        const val SHOOT_TIMEOUT = 1f
 
     }
 

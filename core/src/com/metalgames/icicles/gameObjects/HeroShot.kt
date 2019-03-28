@@ -9,10 +9,10 @@ import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 
-class HeroShot(var position: Vector2) {
+class HeroShot(var position: Vector2,var shotTexture:Texture,var velocity:Vector2) {
 
 
-    var shot: Texture = Texture(Gdx.files.internal("HeroShot.png"))
+
     var batch: SpriteBatch = SpriteBatch()
     var poly = Polygon()
 
@@ -24,23 +24,23 @@ class HeroShot(var position: Vector2) {
     fun update(delta: Float) {
         //   velocity.mulAdd(ICICLE_ACCELERATION, delta)
 
-        // position.mulAdd(velocity,delta)
+         position.mulAdd(velocity,delta)
 
         Gdx.app.debug("pos", "position = ${position.x} y=${position.y}")
     }
 
     fun dispose() {
         batch.dispose()
-        shot.dispose()
+        shotTexture.dispose()
     }
 
     fun render(shapeRenderer: ShapeRenderer, viewPort: ExtendViewport) {
 
-        //draw head
+
         batch.projectionMatrix = viewPort.camera.combined
 
         batch.begin()
-        batch.draw(shot, position.x - SHOT_WIDTH / 2, position.y - SHOT_HEIGHT / 2, SHOT_WIDTH, SHOT_HEIGHT)
+        batch.draw(shotTexture, position.x - SHOT_WIDTH / 2, position.y - SHOT_HEIGHT / 2, SHOT_WIDTH, SHOT_HEIGHT)
         batch.end()
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
@@ -78,7 +78,7 @@ class HeroShot(var position: Vector2) {
         currentPoisition[6] = position.x - SHOT_WIDTH / 2f
         currentPoisition[7] = position.y - SHOT_HEIGHT / 2f
 
-
+        return currentPoisition
     }
 
 
